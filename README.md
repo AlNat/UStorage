@@ -1,5 +1,5 @@
 # UStorage
-A little Java-based universal storage for files
+A little Java-based universal storage for files.
 
 Tasks see at TASK.md
 
@@ -7,9 +7,11 @@ Tasks see at TASK.md
 
 TODO
 
+- 
+-
+-
+
 
 ### Общий процесс работы
 
 TODO
-
-
