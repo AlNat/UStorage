@@ -10,16 +10,16 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.Formula;
+import org.hibernate.annotations.*;
 
 import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.ForeignKey;
+import javax.persistence.Table;
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Центральная сущность - файл.
@@ -82,6 +82,20 @@ public final class File implements Serializable {
     private User user;
 
     /**
+     * Набор ключей систем, в которых сохраненн этот файл
+     * Зачастую будет удобнее получать системы хранения по этому ключу и уже манипулировать ими
+     * чем тащить полную сущность SystemConfiguration
+     *
+     * TODO Разобраться почему валиться с ошибкой!
+     */
+    @LazyCollection(LazyCollectionOption.FALSE) // Необходимо, т.к. иначе это поле становиться LazyLoad
+    @ElementCollection(targetClass=String.class)
+    @Formula("(SELECT sc.key FROM FileStorage as fs " +
+            "LEFT JOIN systemConfiguration as sc ON fs.systemConfigurationID = sc.systemConfigurationID " +
+            "WHERE fs.fileID = fileID)")
+    private List<String> storageSystemKeyList;
+
+    /**
      * Связь с системами хранения этого файла
      * Классическая связь много-ко-многим
      *
@@ -89,7 +103,7 @@ public final class File implements Serializable {
      */
     @JacksonXmlElementWrapper(localName = "storageSystemList")
     @JacksonXmlProperty(localName = "storageSystem")
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @Fetch(FetchMode.SELECT)
     @JoinTable(name = "filestorage",
             joinColumns        = {
@@ -99,11 +113,11 @@ public final class File implements Serializable {
                 @JoinColumn(name = "systemConfigurationID", nullable = false, foreignKey = @ForeignKey(name = "filestorage_systemconfigurationid_fkey"))
             }
     )
-    private List<SystemConfiguration> storageSystem;
+    private List<SystemConfiguration> storageSystemList;
 
 
     public File() {
-        this.storageSystem = new ArrayList<>();
+        this.storageSystemList = new ArrayList<>();
     }
 
 
@@ -163,12 +177,28 @@ public final class File implements Serializable {
         this.user = user;
     }
 
-    public List<SystemConfiguration> getStorageSystem() {
-        return storageSystem;
+    public List<SystemConfiguration> storageSystemList() {
+        return storageSystemList;
     }
 
-    public void setStorageSystem(List<SystemConfiguration> storageSystem) {
-        this.storageSystem = storageSystem;
+    public void storageSystemList(List<SystemConfiguration> storageSystem) {
+        this.storageSystemList = storageSystem;
+    }
+
+    public void setStorageSystem(SystemConfiguration storageSystem) {
+        if (this.storageSystemList == null) {
+            this.storageSystemList = Collections.singletonList(storageSystem);
+        } else {
+            this.storageSystemList().add(storageSystem);
+        }
+    }
+
+    public List<String> getStorageSystemKeyList() {
+        return storageSystemKeyList;
+    }
+
+    public void setStorageSystemKeyList(List<String> storageSystemKeyList) {
+        this.storageSystemKeyList = storageSystemKeyList;
     }
 
 
@@ -184,12 +214,13 @@ public final class File implements Serializable {
                 Objects.equals(storageFileName, file.storageFileName) &&
                 Objects.equals(storageSystemCount, file.storageSystemCount) &&
                 Objects.equals(user, file.user) &&
-                Objects.equals(storageSystem, file.storageSystem);
+                Objects.equals(storageSystemKeyList, file.storageSystemKeyList) &&
+                Objects.equals(storageSystemList, file.storageSystemList);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(fileID, creationDate, filename, extension, storageFileName, storageSystemCount, user, storageSystem);
+        return Objects.hash(fileID, creationDate, filename, extension, storageFileName, storageSystemCount, user, storageSystemKeyList, storageSystemList);
     }
 
 }

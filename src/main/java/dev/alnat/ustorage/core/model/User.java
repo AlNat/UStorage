@@ -72,7 +72,7 @@ public final class User implements Serializable {
     /**
      * Дата регистрации
      */
-    @Column(nullable = false, name = "registerat")
+    @Column
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS", shape = JsonFormat.Shape.STRING)
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
@@ -80,7 +80,7 @@ public final class User implements Serializable {
 
     @JacksonXmlElementWrapper(localName = "fileList")
     @JacksonXmlProperty(localName = "file")
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL)
     @Fetch(FetchMode.SELECT)
     private List<File> fileList;
 
