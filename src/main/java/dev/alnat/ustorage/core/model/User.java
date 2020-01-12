@@ -72,7 +72,7 @@ public final class User implements Serializable {
     /**
      * Дата регистрации
      */
-    @Column(nullable = false, name = "register_at")
+    @Column(nullable = false, name = "registerat")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS", shape = JsonFormat.Shape.STRING)
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)

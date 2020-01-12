@@ -43,7 +43,7 @@ public final class File implements Serializable {
     /**
      * Дата создания файла
      */
-    @Column(nullable = false)
+    @Column(nullable = false, name = "creationdate")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS", shape = JsonFormat.Shape.STRING)
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
@@ -64,11 +64,12 @@ public final class File implements Serializable {
     /**
      * UUID файла для поиска в хранилищах
      */
-    @Column(nullable = false, length = 45)
+    @Column(nullable = false, length = 45, name = "storagefilename")
     private String storageFileName;
 
     /**
      * Кол-во мест, где файл сохранен
+     * Поля нет в БД, подгружается в RunTime
      */
     @Formula(value = "(SELECT COUNT(1) FROM FileStorage fs WHERE fs.fileID = fileID)")
     private Integer storageSystemCount;

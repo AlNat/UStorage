@@ -4,11 +4,18 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.Formula;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlTransient;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -28,6 +35,7 @@ public final class SystemConfiguration implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "systemConfigurationID")
     private Integer systemConfigurationID;
 
     /**
@@ -45,7 +53,7 @@ public final class SystemConfiguration implements Serializable {
     /**
      * Полное имя класса, по которому будет создана системы
      */
-    @Column(nullable = false)
+    @Column(nullable = false, name = "classhandler")
     private String classHandler;
 
     /**
@@ -57,18 +65,44 @@ public final class SystemConfiguration implements Serializable {
     private StorageTypeEnum type;
 
     /**
+     * Кол-во файлов в этой системе
+     * Поля нет в БД, подгружается в RunTime
+     */
+    @Formula(value = "(SELECT COUNT(1) FROM FileStorage fs WHERE fs.systemConfigurationID = systemConfigurationID)")
+    private Integer fileCount;
+
+    /**
      * JSON конфигурация системы
      */
     @JsonIgnore
     @XmlTransient
-    @Column(nullable = true)
+    @Column(nullable = false)
     @Type(type = "text")
     private String configuration;
 
-    // TODO Список файлов
+    /**
+     * Cписок файлов в этой системе
+     * Классическая связь много-ко-многим
+     *
+     * TODO В связи с https://github.com/FasterXML/jackson-dataformat-xml/issues/27 необходимо переделать это имя
+     */
+    @JacksonXmlElementWrapper(localName = "storageSystemList")
+    @JacksonXmlProperty(localName = "storageSystem")
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @Fetch(FetchMode.SELECT)
+    @JoinTable(name = "filestorage",
+            joinColumns = {
+                    @JoinColumn(name = "systemConfigurationID", nullable = false, foreignKey = @ForeignKey(name = "filestorage_systemconfigurationid_fkey"))
+            },
+            inverseJoinColumns = {
+                    @JoinColumn(name = "fileID", nullable = false, foreignKey = @ForeignKey(name = "filestorage_fileid_fkey"))
+            }
+    )
+    private List<File> fileList;
 
 
     public SystemConfiguration() {
+        this.fileList = new ArrayList<>();
     }
 
 
@@ -120,6 +154,22 @@ public final class SystemConfiguration implements Serializable {
         this.configuration = configuration;
     }
 
+    public List<File> getFileList() {
+        return fileList;
+    }
+
+    public void setFileList(List<File> fileList) {
+        this.fileList = fileList;
+    }
+
+    public Integer getFileCount() {
+        return fileCount;
+    }
+
+    public void setFileCount(Integer fileCount) {
+        this.fileCount = fileCount;
+    }
+
 
     @Override
     public boolean equals(Object o) {
@@ -131,12 +181,14 @@ public final class SystemConfiguration implements Serializable {
                 Objects.equals(name, that.name) &&
                 Objects.equals(classHandler, that.classHandler) &&
                 type == that.type &&
-                Objects.equals(configuration, that.configuration);
+                Objects.equals(fileCount, that.fileCount) &&
+                Objects.equals(configuration, that.configuration) &&
+                Objects.equals(fileList, that.fileList);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(systemConfigurationID, key, name, classHandler, type, configuration);
+        return Objects.hash(systemConfigurationID, key, name, classHandler, type, fileCount, configuration, fileList);
     }
 
 }

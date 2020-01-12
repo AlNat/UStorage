@@ -13,6 +13,10 @@ import java.util.regex.Pattern;
  * Licensed by Apache License, Version 2.0
  */
 public class EmailValidator implements ConstraintValidator<Email, String> {
+
+    /**
+     * Валидация происходит через паттер *@*.*
+     */
     private volatile Pattern emailPattern = Pattern.compile("/.+@.+\\..+/i");
 
     @Override

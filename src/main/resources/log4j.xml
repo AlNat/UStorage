@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration xmlns:log4j='http://jakarta.apache.org/log4j/'>
+
+    <appender name="CA" class="org.apache.log4j.ConsoleAppender">
+        <param name="Encoding" value="UTF-8"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d{dd.MM.yyyy HH:mm:ss,SSS} [%t] %-5p %c %x - %m%n" />
+        </layout>
+    </appender>
+
+    <appender name="FAINFO" class="org.apache.log4j.RollingFileAppender">
+        <param name="File" value="logs/UStorage.log"/>
+        <param name="MaxFileSize" value="10MB"/>
+        <param name="MaxBackupIndex" value="10"/>
+        <param name="Threshold" value="INFO"/>
+        <param name="Encoding" value="UTF-8"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d{dd.MM.yyyy HH:mm:ss,SSS} [%t] %-5p %c %x - %m%n" />
+        </layout>
+    </appender>
+
+    <appender name="FAERROR" class="org.apache.log4j.RollingFileAppender">
+        <param name="File" value="$logs/UStorageError.log"/>
+        <param name="MaxFileSize" value="10MB"/>
+        <param name="MaxBackupIndex" value="10"/>
+        <param name="Threshold" value="ERROR"/>
+        <param name="Encoding" value="UTF-8"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d{dd.MM.yyyy HH:mm:ss,SSS} [%t] %-5p %c %x - %m%n" />
+        </layout>
+    </appender>
+
+    <logger name="org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver" additivity="false">
+        <level value="DEBUG"/>
+        <appender-ref ref="CA" />
+        <appender-ref ref="FAINFO" />
+    </logger>
+
+    <!-- Логи о Swagger - только уровня Warning -->
+    <logger name="springfox.documentation.schema.DefaultModelDependencyProvider" additivity="false">
+        <level value="WARN"/>
+        <appender-ref ref="CA" />
+        <appender-ref ref="FAERROR" />
+    </logger>
+
+    <root>
+        <level value="INFO" />
+        <appender-ref ref="CA" />
+        <appender-ref ref="FAINFO" />
+        <appender-ref ref="FAERROR" />
+    </root>
+
+</log4j:configuration>
