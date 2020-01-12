@@ -2,6 +2,7 @@ package dev.alnat.ustorage.core.dao.impl;
 
 import dev.alnat.ustorage.core.dao.ConfigurationDAO;
 import dev.alnat.ustorage.core.model.Configuration;
+import dev.alnat.ustorage.core.model.StorageTypeEnum;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -31,9 +32,15 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
     @Override
     public Configuration getByName(String name) {
         return this.sessionFactory.getCurrentSession()
-                .createQuery("FROM Configuration c where c.name = :name", Configuration.class)
+                .createQuery("FROM Configuration c WHERE c.name = :name", Configuration.class)
                 .setParameter("name", name)
                 .uniqueResult();
+    }
+
+    @Override
+    public String getStorageSystemKeyByType(StorageTypeEnum storageType) {
+        Configuration c = getByName(storageType.name() + "_DEFAULT_STORAGE_PROVIDER");
+        return c.getValue();
     }
 
 }
