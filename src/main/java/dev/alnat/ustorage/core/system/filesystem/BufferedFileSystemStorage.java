@@ -8,7 +8,8 @@ import java.util.Map;
 
 /**
  *
- * TODO Реализовать через корретные буфферизированные варианты
+ * TODO Реализовать через буфферизированные варианты
+ * https://www.youtube.com/watch?v=7GlMS630dt8&list=PLVe-2wcL84b_fBL9xJTxkEBtvCKfRGEV1&index=11
  *
  * Created by @author AlNat on 13.01.2020.
  * Licensed by Apache License, Version 2.0

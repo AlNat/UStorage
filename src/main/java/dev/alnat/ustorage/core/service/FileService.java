@@ -32,25 +32,22 @@ public class FileService {
 
     private final FileDAO fileDAO;
     private final UserDAO userDAO;
-    private final SystemConfigurationDAO systemConfigurationDAO;
 
     private final SystemFactory systemFactory;
 
     @Autowired
     public FileService(FileDAO fileDAO,
                        UserDAO userDAO,
-                       SystemConfigurationDAO systemConfigurationDAO,
                        SystemFactory systemFactory) {
         this.fileDAO = fileDAO;
         this.userDAO = userDAO;
-        this.systemConfigurationDAO = systemConfigurationDAO;
         this.systemFactory = systemFactory;
     }
 
     public void saveFile(MultipartFile file, StorageTypeEnum storageType) throws UStorageException {
         StorageSystem storageSystem = systemFactory.getExternalSystem(storageType);
 
-        // TODO ЗАШИТО ДЛЯ ТЕСТОВ! Удалить после Security
+        // TODO ЗАШИТО ДЛЯ ТЕСТОВ! Удалить после добавления Security
         User u = userDAO.getUserByLogin("test");
 
         // Генерируем UUID файла

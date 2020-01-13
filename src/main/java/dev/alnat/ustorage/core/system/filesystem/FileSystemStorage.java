@@ -3,6 +3,8 @@ package dev.alnat.ustorage.core.system.filesystem;
 import dev.alnat.ustorage.core.model.SystemConfiguration;
 import dev.alnat.ustorage.core.system.AbstractStorageSystem;
 import dev.alnat.ustorage.exception.UStorageException;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -10,7 +12,6 @@ import java.nio.file.Paths;
 
 /**
  * Общие принципы для хранения в любой фаловой системе
- *
  * Проверяет наличие доступа к указанной директории
  *
  * Конфигурация должна выглядеть следующим образом:
@@ -40,14 +41,21 @@ public abstract class FileSystemStorage extends AbstractStorageSystem {
      */
     @Override
     protected boolean validateConfig() {
-        // TODO Выдрать из JSON
-        Path path = Paths.get(systemConfiguration.getConfiguration());
+        Path path;
+        try {
+            JSONObject conf = new JSONObject(systemConfiguration.getConfiguration());
+            path = Paths.get(conf.getString("path"));
+        } catch (JSONException e) {
+            return false;
+        }
+
         return Files.exists(path) && Files.isWritable(path) && Files.isReadable(path);
     }
 
     @Override
     protected void init() throws UStorageException {
-        this.storagePath = Paths.get(systemConfiguration.getConfiguration());
+        JSONObject conf = new JSONObject(systemConfiguration.getConfiguration());
+        this.storagePath = Paths.get(conf.getString("path"));
     }
 
 }

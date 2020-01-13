@@ -27,14 +27,18 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
         this.sessionFactory = factory.unwrap(SessionFactory.class);
     }
 
-    // TODO Список предустановленных конфигураций
+    @Override
+    public String get(String name) {
+        return getByName(name).getValue();
+    }
 
     @Override
     public Configuration getByName(String name) {
-        return this.sessionFactory.getCurrentSession()
+//        return this.sessionFactory.getCurrentSession()
+        return this.manager
                 .createQuery("FROM Configuration c WHERE c.name = :name", Configuration.class)
                 .setParameter("name", name)
-                .uniqueResult();
+                .getSingleResult();
     }
 
     @Override
@@ -42,5 +46,19 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
         Configuration c = getByName(storageType.name() + "_DEFAULT_STORAGE_PROVIDER");
         return c.getValue();
     }
+
+
+    /**
+     * Класс-хранилище для параметров конфигурации
+     * Сами параметры зашиты
+     *
+     * Можно было бы сделать через Enum, но смысла мало
+     */
+    static class ConfigurationParam {
+
+        public static String VERSION = "VERSION";
+
+    }
+
 
 }

@@ -1,7 +1,6 @@
 package dev.alnat.ustorage.core.system.filesystem;
 
 import dev.alnat.ustorage.core.model.SystemConfiguration;
-import dev.alnat.ustorage.core.system.AbstractStorageSystem;
 import dev.alnat.ustorage.exception.UStorageException;
 
 import java.nio.file.Files;
@@ -20,7 +19,7 @@ import java.util.Map;
  * Created by @author AlNat on 12.01.2020.
  * Licensed by Apache License, Version 2.0
  */
-public class SimpleFileSystemStorage extends AbstractStorageSystem {
+public class SimpleFileSystemStorage extends FileSystemStorage {
 
     public SimpleFileSystemStorage(SystemConfiguration systemConfiguration) {
         super(systemConfiguration);
@@ -50,8 +49,5 @@ public class SimpleFileSystemStorage extends AbstractStorageSystem {
     public Map<String, byte[]> getAllFile() throws UStorageException {
         return null;
     }
-
-    /*
-     */
 
 }

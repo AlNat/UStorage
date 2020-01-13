@@ -9,7 +9,27 @@ import dev.alnat.ustorage.core.model.StorageTypeEnum;
  */
 public interface ConfigurationDAO {
 
+    /**
+     * Получение полной записи по ключу
+     *
+     * @param name ключ конфигурации
+     * @return полную запись
+     */
     Configuration getByName(String name);
+
+    /**
+     * Получения значения по ключу
+     * @param name ключ конфигурации
+     * @return текстовое значение из конфигурации
+     */
+    String get(String name);
+
+    /**
+     * Получение ключа системы, дефолтной для данного типа хранения
+     *
+     * @param storageType тип сохранения
+     * @return ключ системы, если отсутсвует - null
+     */
     String getStorageSystemKeyByType(StorageTypeEnum storageType);
 
 }

@@ -137,6 +137,7 @@ public class SystemFactory {
 
         // Проверяем валидность конфигурации
         if (!system.validateConfig()) {
+            log.error("Ошибка при разборе конфигурации системы {}! Конфигурация {} - не валидна!", systemName, systemModel.getConfiguration());
             throw new UStorageException("У системы " + systemName + " невалидная конфигурация! Проверьте настройки");
         }
 
