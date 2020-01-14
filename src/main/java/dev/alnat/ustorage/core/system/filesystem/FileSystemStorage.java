@@ -6,6 +6,7 @@ import dev.alnat.ustorage.exception.UStorageException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -56,6 +57,18 @@ public abstract class FileSystemStorage extends AbstractStorageSystem {
     protected void init() throws UStorageException {
         JSONObject conf = new JSONObject(systemConfiguration.getConfiguration());
         this.storagePath = Paths.get(conf.getString("path"));
+    }
+
+    /**
+     * Получение сущности File, которая представляет собой конкретный файл в ФС
+     * Смотрит на директорию, которая берется из конфигурации и ищет в ней файл с указанным именем
+     *
+     * @param filename имя файла
+     * @return представление файла в директории
+     */
+    protected File generateFileFromFilename(String filename) {
+        File directory = storagePath.toFile();
+        return new File(directory, filename);
     }
 
 }

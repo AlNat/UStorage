@@ -9,12 +9,14 @@ import dev.alnat.ustorage.core.model.User;
 import dev.alnat.ustorage.core.system.StorageSystem;
 import dev.alnat.ustorage.core.system.SystemFactory;
 import dev.alnat.ustorage.exception.UStorageException;
+import dev.alnat.ustorage.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.transaction.Transactional;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -26,6 +28,7 @@ import java.util.UUID;
  * Licensed by Apache License, Version 2.0
  */
 @Service
+@Transactional
 public class FileService {
 
     private Logger log = LoggerFactory.getLogger(this.getClass());
@@ -57,18 +60,20 @@ public class FileService {
         try {
             fileData = file.getBytes();
         } catch (IOException e) {
-            log.error(""); // TODO Добавить
-            throw new UStorageException("");
+            log.error("Ошибка при получении файла для сохранения - {}", e.getMessage());
+            throw new UStorageException("Ошибки при получении файла для сохранения", e);
         }
 
+        // Формируем сущность
         File savedFile = new File();
         savedFile.setCreationDate(LocalDateTime.now());
         savedFile.setStorageSystem(storageSystem.getSystemConfiguration());
         savedFile.setStorageFileName(storageFileName);
         savedFile.setUser(u);
+        savedFile.setExtension(Util.getExtensionFromFilename(file.getOriginalFilename()));
         savedFile.setFilename(file.getOriginalFilename());
 
-        // После чего сохраняем его
+        // После чего сохраняем сам файл через систему, а затем саму сущность
         storageSystem.saveFile(fileData, storageFileName);
         fileDAO.save(savedFile);
     }

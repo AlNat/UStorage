@@ -8,8 +8,8 @@ VALUES (current_timestamp, 'VERSION', '1.0'),
        (current_timestamp, 'FILE_SYSTEM_DEFAULT_STORAGE_SYSTEM', 'SIMPLE_FILE_STORAGE');
 
 INSERT INTO systemconfiguration (classhandler, configuration, key, name, type)
-VALUES ('dev.alnat.core.system.filesystem.SimpleFileSystemStorage', '{}', 'TEST', 'Test', 0),
-       ('dev.alnat.core.system.filesystem.SimpleFileSystemStorage', '{
+VALUES ('dev.alnat.ustorage.core.system.filesystem.SimpleFileSystemStorage', '{}', 'TEST', 'Test', 0),
+       ('dev.alnat.ustorage.core.system.filesystem.SimpleFileSystemStorage', '{
 	"path" : "C:/Work/DIR/"
 }', 'SIMPLE_FILE_STORAGE', 'Простая система для сохранения файлов в ФС', 0);
 

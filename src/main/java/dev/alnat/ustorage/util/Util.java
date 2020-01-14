@@ -10,6 +10,15 @@ import java.time.Duration;
  */
 public class Util {
 
+    public static String getExtensionFromFilename(String filename) {
+        if (filename == null || filename.equals("")) {
+            return null;
+        }
+
+        int lastDotIndex = filename.toLowerCase().lastIndexOf(".");
+        return filename.substring(lastDotIndex);
+    }
+
     /**
      * Метод форматирования временного интервала
      *

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManagerFactory;
 
+
 /**
  * Created by @author AlNat on 08.01.2020.
  * Licensed by Apache License, Version 2.0
@@ -16,14 +17,17 @@ import javax.persistence.EntityManagerFactory;
 @Repository
 public class ConfigurationDAOImpl implements ConfigurationDAO {
 
+    // TODO Перейти на нормальный EntityManager
+
     private SessionFactory sessionFactory;
+
+    // HibernateJpaSessionFactoryBean
 
     @Autowired
     public ConfigurationDAOImpl(EntityManagerFactory factory) {
         if(factory.unwrap(SessionFactory.class) == null){
-            throw new NullPointerException("Factory is not a hibernate factory");
+            throw new NullPointerException("factory is not a hibernate factory");
         }
-
         this.sessionFactory = factory.unwrap(SessionFactory.class);
     }
 
@@ -34,8 +38,7 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
 
     @Override
     public Configuration getByName(String name) {
-//        return this.sessionFactory.getCurrentSession()
-        return this.manager
+        return this.sessionFactory.getCurrentSession()
                 .createQuery("FROM Configuration c WHERE c.name = :name", Configuration.class)
                 .setParameter("name", name)
                 .getSingleResult();
@@ -43,7 +46,7 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
 
     @Override
     public String getStorageSystemKeyByType(StorageTypeEnum storageType) {
-        Configuration c = getByName(storageType.name() + "_DEFAULT_STORAGE_PROVIDER");
+        Configuration c = getByName(storageType.name() + "_DEFAULT_STORAGE_SYSTEM");
         return c.getValue();
     }
 
@@ -59,6 +62,5 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
         public static String VERSION = "VERSION";
 
     }
-
 
 }
