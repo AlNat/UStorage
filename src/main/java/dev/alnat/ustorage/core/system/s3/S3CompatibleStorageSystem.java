@@ -7,9 +7,9 @@ import dev.alnat.ustorage.core.system.AbstractStorageSystem;
  * Created by @author AlNat on 08.01.2020.
  * Licensed by Apache License, Version 2.0
  */
-public abstract class AbstractS3StorageSystem extends AbstractStorageSystem {
+public abstract class S3CompatibleStorageSystem extends AbstractStorageSystem {
 
-    public AbstractS3StorageSystem(SystemConfiguration systemConfiguration) {
+    public S3CompatibleStorageSystem(SystemConfiguration systemConfiguration) {
         super(systemConfiguration);
     }
 

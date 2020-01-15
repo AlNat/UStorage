@@ -113,6 +113,9 @@ public class SystemFactory {
         String classHandler = systemModel.getClassHandler();
         String configuration = systemModel.getConfiguration();
 
+        // TODO Если нет пути в конфигурации - брать классы из war
+        //  Иначе подгружать их из некоторого jar-ника отдельного
+
         // Загружаем класс-плагин для этой системы
         Class<?> plugin;
         try {
@@ -152,102 +155,102 @@ public class SystemFactory {
     public void clearCachedSystems() {
         cachedSystems = null;
     }
-    
+
+
+    /**
+     * Небольшой класс-обертка для хранения не чистой внешней системы (плагина), а обертки с дополнительной метаинформацией
+     */
+    @SuppressWarnings("InnerClassMayBeStatic")
+    private class SystemStorageWrapper {
+
+        /**
+         * Сама система
+         */
+        private AbstractStorageSystem storageSystem;
+
+        /**
+         * Дата и время создания
+         */
+        private LocalDateTime creationDate;
+
+        /**
+         * Число получений этой системы
+         */
+        private AtomicInteger count;
+
+        /**
+         * Возможное время истечения кеша
+         */
+        private LocalDateTime expiredAt;
+
+
+        public SystemStorageWrapper() {
+        }
+
+        public SystemStorageWrapper(AbstractStorageSystem storageSystem) {
+            this.storageSystem = storageSystem;
+            this.creationDate = LocalDateTime.now();
+            this.count = new AtomicInteger(0);
+            this.expiredAt = null;
+        }
+
+        public SystemStorageWrapper(AbstractStorageSystem storageSystem, LocalDateTime expiredAt) {
+            this.storageSystem = storageSystem;
+            this.expiredAt = expiredAt;
+            this.creationDate = LocalDateTime.now();
+            this.count = new AtomicInteger(0);
+        }
+
+
+        public AbstractStorageSystem getStorageSystem() {
+            return storageSystem;
+        }
+
+        public void setStorageSystem(AbstractStorageSystem storageSystem) {
+            this.storageSystem = storageSystem;
+        }
+
+        public LocalDateTime getCreationDate() {
+            return creationDate;
+        }
+
+        public void setCreationDate(LocalDateTime creationDate) {
+            this.creationDate = creationDate;
+        }
+
+        public AtomicInteger getCount() {
+            return count;
+        }
+
+        public void setCount(AtomicInteger count) {
+            this.count = count;
+        }
+
+        public LocalDateTime getExpiredAt() {
+            return expiredAt;
+        }
+
+        public void setExpiredAt(LocalDateTime expiredAt) {
+            this.expiredAt = expiredAt;
+        }
+
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            SystemStorageWrapper that = (SystemStorageWrapper) o;
+            return Objects.equals(storageSystem, that.storageSystem) &&
+                    Objects.equals(creationDate, that.creationDate) &&
+                    Objects.equals(count, that.count) &&
+                    Objects.equals(expiredAt, that.expiredAt);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(storageSystem, creationDate, count, expiredAt);
+        }
+
+    }
+
 }
-
-
-/**
- * Небольшой класс-обертка для хранения не чистой внешней системы (плагина), а обертки с дополнительной метаинформацией
- */
-class SystemStorageWrapper {
-
-    /**
-     * Сама система
-     */
-    private AbstractStorageSystem storageSystem;
-
-    /**
-     * Дата и время создания
-     */
-    private LocalDateTime creationDate;
-
-    /**
-     * Число получений этой системы
-     */
-    private AtomicInteger count;
-
-    /**
-     * Возможное время истечения кеша
-     */
-    private LocalDateTime expiredAt;
-
-
-    public SystemStorageWrapper() {
-    }
-
-    public SystemStorageWrapper(AbstractStorageSystem storageSystem) {
-        this.storageSystem = storageSystem;
-        this.creationDate = LocalDateTime.now();
-        this.count = new AtomicInteger(0);
-        this.expiredAt = null;
-    }
-
-    public SystemStorageWrapper(AbstractStorageSystem storageSystem, LocalDateTime expiredAt) {
-        this.storageSystem = storageSystem;
-        this.expiredAt = expiredAt;
-        this.creationDate = LocalDateTime.now();
-        this.count = new AtomicInteger(0);
-    }
-
-
-    public AbstractStorageSystem getStorageSystem() {
-        return storageSystem;
-    }
-
-    public void setStorageSystem(AbstractStorageSystem storageSystem) {
-        this.storageSystem = storageSystem;
-    }
-
-    public LocalDateTime getCreationDate() {
-        return creationDate;
-    }
-
-    public void setCreationDate(LocalDateTime creationDate) {
-        this.creationDate = creationDate;
-    }
-
-    public AtomicInteger getCount() {
-        return count;
-    }
-
-    public void setCount(AtomicInteger count) {
-        this.count = count;
-    }
-
-    public LocalDateTime getExpiredAt() {
-        return expiredAt;
-    }
-
-    public void setExpiredAt(LocalDateTime expiredAt) {
-        this.expiredAt = expiredAt;
-    }
-
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        SystemStorageWrapper that = (SystemStorageWrapper) o;
-        return Objects.equals(storageSystem, that.storageSystem) &&
-                Objects.equals(creationDate, that.creationDate) &&
-                Objects.equals(count, that.count) &&
-                Objects.equals(expiredAt, that.expiredAt);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(storageSystem, creationDate, count, expiredAt);
-    }
-
-}
-

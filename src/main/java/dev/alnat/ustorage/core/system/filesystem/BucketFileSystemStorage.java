@@ -7,15 +7,16 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Хранение файлов в ФС с эффетивным чтением\записью
- * https://www.youtube.com/watch?v=7GlMS630dt8&list=PLVe-2wcL84b_fBL9xJTxkEBtvCKfRGEV1&index=11
+ * Хранение файлов в разных папках ФС, в зависимости от хэша
+ * Примерный аналог HashMap
+ * @see java.util.HashMap
  *
- * Created by @author AlNat on 13.01.2020.
+ * Created by @author AlNat on 15.01.2020.
  * Licensed by Apache License, Version 2.0
  */
-public class BufferedFileSystemStorage extends FileSystemStorage {
+public class BucketFileSystemStorage extends FileSystemStorage {
 
-    public BufferedFileSystemStorage(SystemConfiguration systemConfiguration) {
+    public BucketFileSystemStorage(SystemConfiguration systemConfiguration) {
         super(systemConfiguration);
     }
 
@@ -44,14 +45,5 @@ public class BufferedFileSystemStorage extends FileSystemStorage {
     public Map<String, byte[]> getAllFile() throws UStorageException {
         return null;
     }
-
-    /*
-            try {
-            Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFilename), "UTF-8"));
-            writer.write(data);
-        } catch (IOException e) {
-            throw new AxiExportException("Ошибка записи в файл", e);
-        }
-     */
 
 }

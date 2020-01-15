@@ -7,8 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -75,23 +74,51 @@ public class SimpleFileSystemStorage extends FileSystemStorage {
 
     @Override
     public Map<String, byte[]> getAllFile() throws UStorageException {
-        try (Stream<Path> walk = Files.walk(storagePath)) {
-            return walk
-                    .filter(Files::isRegularFile)
-                    .collect(Collectors.toMap(
-                            fileKey -> fileKey.getFileName().toString(),
-                            file -> {
-                                try {
-                                    return Files.readAllBytes(file);
-                                } catch (IOException e) {
-                                    log.error("Невозможно прочитать файл {} - он будет пропущен!", file.getFileName());
-                                    return null; // TODO Подумать как удалить этот ключ
-                                }
-                            }
-                    ));
-        } catch (IOException e) {
-            throw new UStorageException(e);
+        Map<String, byte[]> fileList = new TreeMap<>();
+        File[] filesInStorage = storagePath.toFile().listFiles(File::isFile);
+
+        // Если фалов нет - так и возвращаем
+        if (filesInStorage == null) {
+            return Collections.EMPTY_MAP;
         }
+
+        // Прошли все файлы в директории
+        for (final File file : filesInStorage) {
+            String filename = file.getName();
+            byte[] data;
+            try {
+                data = Files.readAllBytes(file.toPath());
+            } catch (IOException e) {
+                log.error("Невозможно прочитать файл {} - он будет пропущен!", file.getName());
+                data = null;
+            }
+
+            // Если смогли считать файл - добавили его к списку
+            if (data != null) {
+                fileList.put(filename, data);
+            }
+        }
+
+        return fileList;
+
+        // TODO Подумать как красиво можно это сделать через StreamAPI
+//        try (Stream<Path> walk = Files.walk(storagePath)) {
+//            return walk
+//                    .filter(Files::isRegularFile)
+//                    .collect(Collectors.toMap(
+//                            fileKey -> fileKey.getFileName().toString(),
+//                            file -> {
+//                                try {
+//                                    return Files.readAllBytes(file);
+//                                } catch (IOException e) {
+//                                    log.error("Невозможно прочитать файл {} - он будет пропущен!", file.getFileName());
+//                                    return null; // TODO Как удалить этот ключ и перейти к следующему вхождению
+//                                }
+//                            }
+//                    ));
+//        } catch (IOException e) {
+//            throw new UStorageException(e);
+//        }
     }
 
 }

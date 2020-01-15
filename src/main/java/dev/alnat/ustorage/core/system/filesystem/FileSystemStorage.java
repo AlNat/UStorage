@@ -56,7 +56,19 @@ public abstract class FileSystemStorage extends AbstractStorageSystem {
     @Override
     protected void init() throws UStorageException {
         JSONObject conf = new JSONObject(systemConfiguration.getConfiguration());
-        this.storagePath = Paths.get(conf.getString("path"));
+
+        String directory = conf.getString("path");
+        this.storagePath = Paths.get(directory);
+
+        // TODO Обдумать такое поведение
+//        if (!Files.exists(storagePath)) {
+//            boolean created = storagePath.toFile().mkdir();
+//            if (!created) {
+//                throw new UStorageException("Директория " + directory + " {} отсутствовала и не может быть создана!");
+//            } else {
+//                log.info("Директория {} отсутствовала и была успешно создана", directory);
+//            }
+//        }
     }
 
     /**
