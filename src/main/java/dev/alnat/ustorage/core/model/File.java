@@ -90,7 +90,7 @@ public final class File implements Serializable {
      */
     @LazyCollection(LazyCollectionOption.FALSE) // Необходимо, т.к. иначе это поле становиться LazyLoad
     @ElementCollection(targetClass=String.class)
-    @Formula("(SELECT sc.key FROM FileStorage as fs " +
+    @Formula("(SELECT (sc.key) FROM FileStorage as fs " +
             "LEFT JOIN systemConfiguration as sc ON fs.systemConfigurationID = sc.systemConfigurationID " +
             "WHERE fs.fileID = fileID)")
     private List<String> storageSystemKeyList;

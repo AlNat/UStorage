@@ -20,16 +20,19 @@ import org.springframework.web.multipart.MultipartFile;
         protocols = "http, https",
         tags = "file"
 )
-@RestController("/api/file")
+@RestController
+@RequestMapping(value = "/api/file")
 @Validated
 public class FileAPIController {
 
     private final FileService fileService;
 
+
     @Autowired
     public FileAPIController(FileService fileService) {
         this.fileService = fileService;
     }
+
 
     @ApiOperation(value = "Сохранение файла в дефолтной системе указанного типа.", code = 201)
     @ApiResponses(value = {
@@ -42,12 +45,14 @@ public class FileAPIController {
     })
     @ResponseStatus(HttpStatus.CREATED)
     @RequestMapping(value = "/{storageType}/upload", method = RequestMethod.POST)
-    public void upload(@RequestParam("file")
+    public String upload(@RequestParam("file")
                                MultipartFile file,
                        @ApiParam(value = "File Type", required = true, defaultValue = "FILE_SYSTEM")
                        @PathVariable
                                StorageTypeEnum storageType) throws UStorageException {
-        fileService.saveFile(file, storageType);
+        return fileService.saveFile(file, storageType);
     }
+
+    // TODO Для MVP прокинуть остальные CRUD методы
 
 }

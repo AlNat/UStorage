@@ -1,7 +1,6 @@
 package dev.alnat.ustorage.core.service;
 
 import dev.alnat.ustorage.core.dao.FileDAO;
-import dev.alnat.ustorage.core.dao.SystemConfigurationDAO;
 import dev.alnat.ustorage.core.dao.UserDAO;
 import dev.alnat.ustorage.core.model.File;
 import dev.alnat.ustorage.core.model.StorageTypeEnum;
@@ -38,6 +37,7 @@ public class FileService {
 
     private final SystemFactory systemFactory;
 
+
     @Autowired
     public FileService(FileDAO fileDAO,
                        UserDAO userDAO,
@@ -47,7 +47,16 @@ public class FileService {
         this.systemFactory = systemFactory;
     }
 
-    public void saveFile(MultipartFile file, StorageTypeEnum storageType) throws UStorageException {
+
+    /**
+     * Метод сохранения файла в дефолтную для данного типа систему
+     *
+     * @param file файл для загрузки
+     * @param storageType тип системы для сохранения
+     * @return имя файла в системе
+     * @throws UStorageException при ошибке
+     */
+    public String saveFile(MultipartFile file, StorageTypeEnum storageType) throws UStorageException {
         StorageSystem storageSystem = systemFactory.getExternalSystem(storageType);
 
         // TODO ЗАШИТО ДЛЯ ТЕСТОВ! Удалить после добавления Security
@@ -55,8 +64,8 @@ public class FileService {
 
         // Генерируем UUID файла
         String storageFileName = UUID.randomUUID().toString();
-        byte[] fileData;
 
+        byte[] fileData;
         try {
             fileData = file.getBytes();
         } catch (IOException e) {
@@ -76,6 +85,10 @@ public class FileService {
         // После чего сохраняем сам файл через систему, а затем саму сущность
         storageSystem.saveFile(fileData, storageFileName);
         fileDAO.save(savedFile);
+
+        return storageFileName;
     }
+
+    // TODO Остальные методы сделать
 
 }

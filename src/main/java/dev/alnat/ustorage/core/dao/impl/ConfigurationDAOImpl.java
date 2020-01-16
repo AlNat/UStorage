@@ -3,11 +3,10 @@ package dev.alnat.ustorage.core.dao.impl;
 import dev.alnat.ustorage.core.dao.ConfigurationDAO;
 import dev.alnat.ustorage.core.model.Configuration;
 import dev.alnat.ustorage.core.model.StorageTypeEnum;
-import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityManager;
 
 
 /**
@@ -17,18 +16,11 @@ import javax.persistence.EntityManagerFactory;
 @Repository
 public class ConfigurationDAOImpl implements ConfigurationDAO {
 
-    // TODO Перейти на нормальный EntityManager
-
-    private SessionFactory sessionFactory;
-
-    // HibernateJpaSessionFactoryBean
+    private final EntityManager entityManager;
 
     @Autowired
-    public ConfigurationDAOImpl(EntityManagerFactory factory) {
-        if(factory.unwrap(SessionFactory.class) == null){
-            throw new NullPointerException("factory is not a hibernate factory");
-        }
-        this.sessionFactory = factory.unwrap(SessionFactory.class);
+    public ConfigurationDAOImpl(EntityManager entityManager) {
+        this.entityManager = entityManager;
     }
 
     @Override
@@ -38,7 +30,7 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
 
     @Override
     public Configuration getByName(String name) {
-        return this.sessionFactory.getCurrentSession()
+        return this.entityManager
                 .createQuery("FROM Configuration c WHERE c.name = :name", Configuration.class)
                 .setParameter("name", name)
                 .getSingleResult();
@@ -48,19 +40,6 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
     public String getStorageSystemKeyByType(StorageTypeEnum storageType) {
         Configuration c = getByName(storageType.name() + "_DEFAULT_STORAGE_SYSTEM");
         return c.getValue();
-    }
-
-
-    /**
-     * Класс-хранилище для параметров конфигурации
-     * Сами параметры зашиты
-     *
-     * Можно было бы сделать через Enum, но смысла мало
-     */
-    static class ConfigurationParam {
-
-        public static String VERSION = "VERSION";
-
     }
 
 }

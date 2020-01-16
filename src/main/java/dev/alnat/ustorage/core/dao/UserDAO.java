@@ -1,7 +1,7 @@
 package dev.alnat.ustorage.core.dao;
 
 import dev.alnat.ustorage.core.model.User;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
  * Licensed by Apache License, Version 2.0
  */
 @Repository
-public interface UserDAO extends CrudRepository<User, Integer> {
+public interface UserDAO extends PagingAndSortingRepository<User, Integer> {
 
     User getUserByLogin(String login);
 

@@ -1,7 +1,9 @@
 package dev.alnat.ustorage.core.service;
 
+import dev.alnat.ustorage.core.dao.UserDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -17,6 +19,13 @@ import javax.transaction.Transactional;
 public class UserService {
 
     private Logger log = LoggerFactory.getLogger(this.getClass());
+
+    private final UserDAO userDAO;
+
+    @Autowired
+    public UserService(UserDAO userDAO) {
+        this.userDAO = userDAO;
+    }
 
 
 }

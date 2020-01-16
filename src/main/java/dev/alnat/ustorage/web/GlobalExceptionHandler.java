@@ -28,4 +28,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         log.error("Stack: {}", Util.getStackTrace(e));
     }
 
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public void catchException(Exception e) {
+        log.error("Ошибка: {}", e.getMessage());
+        log.error("Stack: {}", Util.getStackTrace(e));
+    }
+
 }
