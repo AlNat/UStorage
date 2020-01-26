@@ -1,5 +1,8 @@
 package dev.alnat.ustorage.web.ui;
 
+import dev.alnat.ustorage.core.model.User;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,8 +26,7 @@ public class BasicUserController {
         return "redirect:/login";
     }
 
-
-    @RequestMapping(value = "/login", method = RequestMethod.GET)
+    @RequestMapping(value = "/login", method = {RequestMethod.GET, RequestMethod.POST})
     public String login(@RequestParam(value = "error", required = false) String error,
                         @RequestParam(value = "logout", required = false) String logout,
                         ModelMap model) {
@@ -36,6 +38,23 @@ public class BasicUserController {
         }
 
         return "login";
+    }
+
+    /**
+     * Страница профиля
+     *
+     * @param model  модель
+     * @return заполненную страницу
+     */
+    @RequestMapping(value = "/profile", method = RequestMethod.GET)
+    public String profilePage(ModelMap model) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User u = (User) auth.getPrincipal();
+
+        model.addAttribute("group", u.getRole());
+        model.addAttribute("username", u.getLogin());
+
+        return "/profile";
     }
 
 }

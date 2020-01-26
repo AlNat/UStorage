@@ -1,4 +1,5 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring"%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <!DOCTYPE html>
 <html lang="en">
@@ -55,7 +56,7 @@
   .card__title {
     margin-bottom: 10px;
 
-    color: #7b42ff;
+    color: #1f48ff;
     font-size: 1.5rem;
     line-height: 2rem;
     font-weight: bold;
@@ -77,16 +78,16 @@
     color: #fff;
     font-size: 1rem;
 
-    background: #7b42ff;
+    background: #1f48ff;
     border: none;
     outline: none;
   }
 
   .button:hover {
-    color: #7b42ff;
+    color: #1f48ff;
 
     background: #fff;
-    outline: 1px solid #7b42ff;
+    outline: 1px solid #1f48ff;
     cursor: pointer;
 
     transition: 0.4s;
@@ -109,7 +110,7 @@
   }
 
   .input:focus {
-    outline: 1px solid #7b42ff;
+    outline: 1px solid #1f48ff;
     transition: 0.1s;
     background: #fcf5fb;
   }
@@ -145,7 +146,7 @@
     <div class="message message_success">Вы вышли из системы</div>
     </c:if>
 
-    <form class="form" action="<c:url value='/j_spring_security_check' />" method="post">
+    <form class="form" action="<spring:url value="/login"/>" method="post">
       <input class="form__item input" autofocus placeholder="Логин" name="username" type="text">
       <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
       <input class="form__item input" placeholder="Пароль" name="password" type="password">

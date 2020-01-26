@@ -1,5 +1,7 @@
 package dev.alnat.ustorage.config;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -9,9 +11,20 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * Аутентификация для всех запросов
@@ -24,9 +37,11 @@ import org.springframework.security.web.authentication.session.SessionAuthentica
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true) // Включаем конфигурирование аннотациями
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
+    private Logger log = LoggerFactory.getLogger(this.getClass());
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http// Basic авторизация
+        http
                 .httpBasic().and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED).and()
                 .authorizeRequests()
@@ -37,12 +52,15 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                     .loginPage("/login")
                     .usernameParameter("username")
                     .passwordParameter("password")
-                    .loginProcessingUrl("/j_spring_security_check") // Т.к. https://docs.spring.io/spring-security/site/migrate/current/3-to-4/html5/migrate-3-to-4-xml.html#m3to4-xmlnamespace-form-login
-                    .successForwardUrl("/web/file")
+                    .loginProcessingUrl("/login") // Т.к. https://docs.spring.io/spring-security/site/migrate/current/3-to-4/html5/migrate-3-to-4-xml.html#m3to4-xmlnamespace-form-login
                     .failureForwardUrl("/login?error=true")
                     .permitAll()
+                    .successHandler((httpServletRequest, httpServletResponse, authentication) -> {
+                        // TODO Заллогировать в отдельную таблицу
+                        httpServletResponse.setHeader("last_login_in", LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
+                        httpServletResponse.sendRedirect("/web/");
+                    })
                     .and()
-                .anonymous().disable()
                 .logout() // Выход из учетной записи
                     .logoutUrl("/logout")
                     .logoutSuccessUrl("/login?logout=true")
@@ -54,7 +72,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .authorizeRequests() // UI доступен админам и пользователям
                     .antMatchers("/web/").hasAnyAuthority(RoleHolder.ADMIN, RoleHolder.USER).and()
                 .authorizeRequests() // Все остальные запросы - только админ
-                    .anyRequest().hasAnyAuthority(RoleHolder.ADMIN);
+                    .antMatchers("/**").hasAnyAuthority(RoleHolder.ADMIN);
     }
 
     @Bean
