@@ -1,11 +1,9 @@
 package dev.alnat.ustorage.core.service;
 
+import dev.alnat.ustorage.config.RoleHolder;
 import dev.alnat.ustorage.core.dao.FileDAO;
 import dev.alnat.ustorage.core.dao.UserDAO;
-import dev.alnat.ustorage.core.model.File;
-import dev.alnat.ustorage.core.model.FileDTO;
-import dev.alnat.ustorage.core.model.StorageTypeEnum;
-import dev.alnat.ustorage.core.model.User;
+import dev.alnat.ustorage.core.model.*;
 import dev.alnat.ustorage.core.system.StorageSystem;
 import dev.alnat.ustorage.core.system.SystemFactory;
 import dev.alnat.ustorage.exception.UStorageException;
@@ -16,9 +14,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -67,12 +67,12 @@ public class FileService {
     }
 
     /**
+     * Сохранение файла в конкретной системе
      *
-     *
-     * @param file
-     * @param systemKey
-     * @return
-     * @throws UStorageException
+     * @param file файл для сохранения
+     * @param systemKey ключ системы
+     * @return идентификатор файла в системе
+     * @throws UStorageException при ошибке
      */
     public String saveFile(MultipartFile file, String systemKey) throws UStorageException {
         StorageSystem storageSystem = systemFactory.getExternalSystem(systemKey);
@@ -84,13 +84,14 @@ public class FileService {
     }
 
     /**
+     * Сохранение файла в системе
+     * Приватный метод для внутреннего использования - вынесение общей части из методов сохранения
      *
-     *
-     * @param file
-     * @param storageSystem
-     * @param u
-     * @return
-     * @throws UStorageException
+     * @param file файл для сохранения
+     * @param storageSystem сама система
+     * @param u пользователь, который инициировал сохранение
+     * @return идентификатор файла в системе
+     * @throws UStorageException при ошибке
      */
     private String saveFileToSystem(MultipartFile file, StorageSystem storageSystem, User u) throws UStorageException {
         // Генерируем UUID файла
@@ -121,13 +122,13 @@ public class FileService {
     }
 
     /**
+     * Метод получения файла
      *
-     *
-     * @param fileName
-     * @return
-     * @throws UStorageException
+     * @param fileName оригинальное имя файл
+     * @return обертка над файлом (сам файл, его имя и дата сохранения)
+     * @throws UStorageException при ошибке
      */
-    public FileDTO download(String fileName) throws UStorageException {
+    public FileDTO downloadByOriginalFileName(String fileName) throws UStorageException {
         File savedFile = fileDAO.getByFilename(fileName);
         String storageSystemKey;
 
@@ -136,7 +137,7 @@ public class FileService {
             log.error("");
             throw new UStorageException("");
         } else if (savedFile.getStorageSystemCount() > 1) {
-            // TODO Выбирать системы с которой нужно читать в зависимости от политики...
+            // TODO Выбирать системы с которой нужно читать в зависимости от политики (горячее\холодное хранилище и тд)
             storageSystemKey = savedFile.getStorageSystemKeyList().get(0);
         } else {
             storageSystemKey = savedFile.getStorageSystemKeyList().get(0);
@@ -149,16 +150,61 @@ public class FileService {
         return new FileDTO(savedFile, fileData);
     }
 
-    // Удаление файла
-    // Удаление файла в системе по имени
-    // Удаление файла в системе по типу
+    /**
+     * Удаление файла по оригинальному имени
+     *
+     * @param fileName имя файла
+     * @throws UStorageException при ошибке
+     */
+    public void deleteFile(String fileName) throws UStorageException {
+        File fileToDelete = fileDAO.getByFilename(fileName);
+        List<String> systemKeyList = fileToDelete.getStorageSystemKeyList();
+        for (String key : systemKeyList) {
+            systemFactory.getExternalSystem(key).deleteFile(fileToDelete.getStorageFileName());
+        }
+        fileDAO.delete(fileToDelete);
+    }
 
-    // Получения списка файлов
-    // Получения списка файлов в системе по имени
-    // Получения списка файлов в системе по типу
+    /**
+     * Удаление файла по оригинальному имени в системе
+     * Нужно если хочется удалить файл, сохраненный в нескольких системах, только в одном месте
+     *
+     * @param fileName оригинальное имя файла
+     * @param systemKey ключ системы
+     * @throws UStorageException при ошибке
+     */
+    public void deleteFile(String fileName, String systemKey) throws UStorageException {
+        File fileToDelete = fileDAO.getByFilename(fileName);
+        List<String> systemKeyList = fileToDelete.getStorageSystemKeyList();
 
-    // Получения списка имен файлов
-    // Получения списка имен файлов в системе по имени
-    // Получения списка имен файлов в системе по типу
+        if (!systemKeyList.contains(systemKey)) {
+            log.error(""); // TODO
+            throw new UStorageException("");
+        }
+
+        StorageSystem system = systemFactory.getExternalSystem(systemKey);
+        system.deleteFile(fileToDelete.getStorageFileName());
+
+        // Если эта система была единственная для сохранения - удаляем сам файл
+        if (systemKeyList.size() < 2) {
+            fileDAO.delete(fileToDelete);
+        } else {
+            fileToDelete.getStorageSystemList().remove(system);
+            fileDAO.save(fileToDelete);
+        }
+    }
+
+    @PostConstruct
+    public void test () {
+        RoleHolder.generateAuthoritiesToUser(null);
+    }
+
+    // TODO:
+    //  Получения списка файлов
+    //  Получения списка файлов в системе по имени
+    //  Получения списка файлов в системе по типу
+    //  Получения списка имен файлов
+    //  Получения списка имен файлов в системе по имени
+    //  Получения списка имен файлов в системе по типу
 
 }

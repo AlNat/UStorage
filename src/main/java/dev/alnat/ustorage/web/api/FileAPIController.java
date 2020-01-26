@@ -66,12 +66,12 @@ public class FileAPIController {
             @ApiResponse(code = 500, message = "Ошибка при выполнении")
     })
     @RequestMapping(value = "/download", method = {RequestMethod.POST, RequestMethod.GET})
-    public void download(@ApiParam(value = "StorageFileName", required = true, defaultValue = "test")
+    public void downloadByOriginalFileName(@ApiParam(value = "Original File Name", required = true, defaultValue = "test")
                          @RequestParam String fileName,
                          HttpServletResponse response) throws UStorageException, Exception {
         // TODO Возвращать 404 если файла нет
         // TODO Посмотреть на FileSystemResource
-        FileDTO file = fileService.download(fileName);
+        FileDTO file = fileService.downloadByOriginalFileName(fileName);
 
         response.setContentLength(file.getFile().length);
         response.setHeader("Content-Disposition", "attachment; filename=" + file.getFileName());
@@ -79,5 +79,7 @@ public class FileAPIController {
         response.getOutputStream().write(file.getFile());
         response.getOutputStream().flush();
     }
+
+    // TODO Прокинуть остальные сервисные методы
 
 }

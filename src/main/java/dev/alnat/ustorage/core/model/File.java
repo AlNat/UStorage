@@ -20,6 +20,7 @@ import javax.persistence.Table;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Центральная сущность - файл.
@@ -57,8 +58,9 @@ public final class File implements Serializable {
 
     /**
      * Расширение файла
+     * Может отсутствовать
      */
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String extension;
 
     /**
@@ -87,12 +89,14 @@ public final class File implements Serializable {
      * чем тащить полную сущность SystemConfiguration
      *
      * TODO Разобраться почему валиться с ошибкой!
+     *  Если не получиться - оставить SystemConfiguration как много-ко-многим и тащить данные оттуда
      */
     @LazyCollection(LazyCollectionOption.FALSE) // Необходимо, т.к. иначе это поле становиться LazyLoad
     @ElementCollection(targetClass=String.class)
-    @Formula("(SELECT (sc.key) FROM FileStorage as fs " +
-            "LEFT JOIN systemConfiguration as sc ON fs.systemConfigurationID = sc.systemConfigurationID " +
-            "WHERE fs.fileID = fileID)")
+//    @Formula("(SELECT fs.systemConfigurationID " +
+//            "FROM FileStorage AS fs " +
+//            "LEFT JOIN systemConfiguration AS sc ON fs.systemConfigurationID = sc.systemConfigurationID " +
+//            "WHERE fs.fileID = f.fileID)")
     private List<String> storageSystemKeyList;
 
     /**
@@ -103,7 +107,7 @@ public final class File implements Serializable {
      */
     @JacksonXmlElementWrapper(localName = "storageSystemList")
     @JacksonXmlProperty(localName = "storageSystem")
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @Fetch(FetchMode.SELECT)
     @JoinTable(name = "filestorage",
             joinColumns        = {
@@ -177,11 +181,11 @@ public final class File implements Serializable {
         this.user = user;
     }
 
-    public List<SystemConfiguration> storageSystemList() {
+    public List<SystemConfiguration> getStorageSystemList() {
         return storageSystemList;
     }
 
-    public void storageSystemList(List<SystemConfiguration> storageSystem) {
+    public void setStorageSystemList(List<SystemConfiguration> storageSystem) {
         this.storageSystemList = storageSystem;
     }
 
@@ -189,12 +193,15 @@ public final class File implements Serializable {
         if (this.storageSystemList == null) {
             this.storageSystemList = Collections.singletonList(storageSystem);
         } else {
-            this.storageSystemList().add(storageSystem);
+            this.storageSystemList.add(storageSystem);
         }
     }
 
     public List<String> getStorageSystemKeyList() {
-        return storageSystemKeyList;
+//        return storageSystemKeyList; // СМ to do Выше
+         return storageSystemList.stream()
+                 .map(SystemConfiguration::getKey)
+                 .collect(Collectors.toList());
     }
 
     public void setStorageSystemKeyList(List<String> storageSystemKeyList) {

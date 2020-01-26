@@ -16,6 +16,11 @@ public class Util {
         }
 
         int lastDotIndex = filename.toLowerCase().lastIndexOf(".");
+
+        // Если у файла нет расширения
+        if (lastDotIndex == -1) {
+            return null;
+        }
         return filename.substring(lastDotIndex);
     }
 
