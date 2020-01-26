@@ -39,7 +39,7 @@ public class CommonAPIController {
             @ApiResponse(code = 404, message = "Данные не найдены"),
             @ApiResponse(code = 500, message = "Ошибка при выполнении")
     })
-    @RequestMapping(value = "/ping")
+    @RequestMapping(value = "/ping", produces = "text/plain")
     public String ping() throws UStorageException {
         return "pong";
     }
@@ -53,7 +53,7 @@ public class CommonAPIController {
             @ApiResponse(code = 404, message = "Данные не найдены"),
             @ApiResponse(code = 500, message = "Ошибка при выполнении")
     })
-    @RequestMapping(value = "/version", method = RequestMethod.GET)
+    @RequestMapping(value = "/version", method = RequestMethod.GET, produces = "text/plain")
     public String getVersion() throws UStorageException {
         return commonService.getVersion();
     }
