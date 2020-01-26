@@ -9,8 +9,13 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+import dev.alnat.ustorage.config.RoleHolder;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
+import org.springframework.security.core.CredentialsContainer;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
@@ -19,12 +24,12 @@ import javax.validation.constraints.Pattern;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Описание сущность пользователя
+ *
+ * TODO Имплементировать методы Security
  *
  * Created by @author AlNat on 05.01.2020.
  * Licensed by Apache License, Version 2.0
@@ -33,7 +38,7 @@ import java.util.Objects;
 @Table(name = "user")
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "userID", scope = User.class)
-public final class User implements Serializable {
+public final class User implements Serializable, UserDetails, CredentialsContainer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -174,4 +179,48 @@ public final class User implements Serializable {
         return Objects.hash(userID, login, password, email, role, registerAt, fileList);
     }
 
+
+    // Ниже идут методы, необходимые для функционирования SpringSecurity с данной моделью
+
+    /**
+     * Метод очистки учетных данных
+     * Удаляем пароль
+     */
+    @Override
+    @JsonIgnore
+    public void eraseCredentials() {
+        this.password = null;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return RoleHolder.generateAuthoritiesToUser(this);
+    }
+
+    @Override
+    public String getUsername() {
+        return login;
+    }
+
+    // TODO Все методы ниже хранить в структуре БД \ делать расчетными
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 }

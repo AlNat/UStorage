@@ -1,5 +1,6 @@
 package dev.alnat.ustorage.web.api;
 
+import dev.alnat.ustorage.config.RoleHolder;
 import dev.alnat.ustorage.core.model.FileDTO;
 import dev.alnat.ustorage.core.model.StorageTypeEnum;
 import dev.alnat.ustorage.core.service.FileService;
@@ -7,6 +8,7 @@ import dev.alnat.ustorage.exception.UStorageException;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -65,8 +67,10 @@ public class FileAPIController {
             @ApiResponse(code = 404, message = "Данные не найдены"),
             @ApiResponse(code = 500, message = "Ошибка при выполнении")
     })
+    @Secured({RoleHolder.USER, RoleHolder.ADMIN})
     @RequestMapping(value = "/download", method = {RequestMethod.POST, RequestMethod.GET})
-    public void downloadByOriginalFileName(@ApiParam(value = "Original File Name", required = true, defaultValue = "test")
+    public void downloadByOriginalFileName(
+            @ApiParam(value = "Original File Name", required = true, defaultValue = "test")
                          @RequestParam String fileName,
                          HttpServletResponse response) throws UStorageException, Exception {
         // TODO Возвращать 404 если файла нет

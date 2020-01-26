@@ -4,6 +4,8 @@ import dev.alnat.ustorage.core.service.CommonService;
 import dev.alnat.ustorage.exception.UStorageException;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -23,6 +25,9 @@ import org.springframework.web.bind.annotation.*;
 public class CommonAPIController {
 
     private final CommonService commonService;
+
+    @Autowired
+    private PasswordEncoder bCryptPasswordEncoder;
 
     @Autowired
     public CommonAPIController(CommonService commonService) {
@@ -56,6 +61,11 @@ public class CommonAPIController {
     @RequestMapping(value = "/version", method = RequestMethod.GET, produces = "text/plain")
     public String getVersion() throws UStorageException {
         return commonService.getVersion();
+    }
+
+    @RequestMapping(value = "/encypt", method = RequestMethod.GET, produces = "text/plain")
+    public String encrypt(String enc) {
+        return bCryptPasswordEncoder.encode(enc);
     }
 
 }

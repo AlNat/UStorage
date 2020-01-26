@@ -1,9 +1,13 @@
 package dev.alnat.ustorage.core.service;
 
 import dev.alnat.ustorage.core.dao.UserDAO;
+import dev.alnat.ustorage.core.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -16,7 +20,7 @@ import javax.transaction.Transactional;
  */
 @Service
 @Transactional
-public class UserService {
+public class UserService implements UserDetailsService {
 
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -27,5 +31,16 @@ public class UserService {
         this.userDAO = userDAO;
     }
 
+
+    @Override
+    public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
+        User u = userDAO.getUserByLogin(s);
+
+        if (u == null) {
+            throw new UsernameNotFoundException("Username " + s + " not found");
+        }
+
+        return u;
+    }
 
 }

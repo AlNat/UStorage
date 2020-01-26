@@ -11,6 +11,8 @@ import dev.alnat.ustorage.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -60,8 +62,9 @@ public class FileService {
     public String saveFile(MultipartFile file, StorageTypeEnum storageType) throws UStorageException {
         StorageSystem storageSystem = systemFactory.getExternalSystem(storageType);
 
-        // TODO ЗАШИТО ДЛЯ ТЕСТОВ! Удалить после добавления Security
-        User u = userDAO.getUserByLogin("test");
+        // Получаем пользователя
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User u = (User) auth.getPrincipal();
 
         return saveFileToSystem(file, storageSystem, u);
     }
@@ -192,11 +195,6 @@ public class FileService {
             fileToDelete.getStorageSystemList().remove(system);
             fileDAO.save(fileToDelete);
         }
-    }
-
-    @PostConstruct
-    public void test () {
-        RoleHolder.generateAuthoritiesToUser(null);
     }
 
     // TODO:

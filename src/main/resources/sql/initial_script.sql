@@ -1,11 +1,12 @@
-INSERT INTO "user" (password, registerat, email, role, login)
-VALUES ('test', current_timestamp, 'test@test.ru', 'USER', 'test'),
-       ('admin', current_timestamp, 'admin@test.ru', 'ADMIN, USER', 'admin');
+INSERT INTO "user" (registerat, email, role, login, password)
+VALUES (current_timestamp, 'test@test.ru',  'ROLE_USER',                        'test',     '$2a$10$s6hbCRVLOkbIT3W8B/ucD.4WctXGLgDNfrmPqy2ha3pfix46FSnCG'), -- user
+       (current_timestamp, 'api@test.ru',   'ROLE_API',                         'api',      '$2a$10$FEYQVFje/e3YZoXo2DEBZ.tdDBBoZOKaJ9MRIWYhMzdJ1faFIVzoq'), -- api
+       (current_timestamp, 'admin@test.ru', 'ROLE_ADMIN, ROLE_API, ROLE_USER',  'admin',    '$2a$10$Lfrvvv8X6Jv9PgzkUSj5j.uHpV0nTPp0CKuSuX1/X4bIIqPtWVTUy'); -- admin
 
 INSERT INTO configuration (created, name, value)
-VALUES (current_timestamp, 'VERSION', '1.0'),
-       (current_timestamp, 'SAVE_POLICY', 'ONE'),
-       (current_timestamp, 'FILE_SYSTEM_DEFAULT_STORAGE_SYSTEM', 'SIMPLE_FILE_STORAGE');
+VALUES (current_timestamp, 'VERSION',                               '1.0'),
+       (current_timestamp, 'SAVE_POLICY',                           'ONE'),
+       (current_timestamp, 'FILE_SYSTEM_DEFAULT_STORAGE_SYSTEM',    'SIMPLE_FILE_STORAGE');
 
 INSERT INTO systemconfiguration (classhandler, configuration, key, name, type)
 VALUES ('dev.alnat.ustorage.core.system.filesystem.SimpleFileSystemStorage', '{}', 'TEST', 'Test', 0),
